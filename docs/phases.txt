@@ -1,0 +1,33 @@
+Phase 1 — Project Initialization
+
+Phase 1B — Create Docker files
+┌─────────────────────────────────────┐
+│          Docker Compose             │
+│                                     │
+│  ┌─────────┐   ┌──────────────┐    │
+│  │  Spark   │   │ PostgreSQL   │    │
+│  │          │   │             │    │
+│  │ PySpark  │   │ Source DB   │    │
+│  └─────────┘   └──────┬───────┘    │
+│                       │            │
+│                ┌──────▼──────┐     │
+│                │   pgAdmin   │     │
+│                └─────────────┘     │
+└─────────────────────────────────────┘
+
+                    TRANSACTION ANALYTICS SPARK
+                              │
+                Docker Network: docker_default
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+          ▼                   ▼                   ▼
+   PostgreSQL 16          pgAdmin 4            Spark
+   :5435                  :5050                3.5.7
+   UP ✅                   UP ✅                 UP ✅
+          │
+          │
+          ▼
+transaction_analytics_postgres_data
+          │
+          └── ONLY this project's PostgreSQL data

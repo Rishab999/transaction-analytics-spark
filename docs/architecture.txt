@@ -1,0 +1,113 @@
+============================================================
+TRANSACTION ANALYTICS WITH APACHE SPARK
+ARCHITECTURE DOCUMENT
+============================================================
+
+
+============================================================
+ARCHITECTURE 01 — INITIAL CONCEPT
+============================================================
+
+CSV
+ |
+ v
+PySpark
+ |
+ v
+Spark DataFrame
+ |
+ +--> Transformations
+ |
+ +--> Joins
+ |
+ +--> Aggregations
+ |
+ +--> Window Functions
+ |
+ v
+Parquet
+ |
+ +--> Bronze
+ +--> Silver
+ +--> Gold
+
+
+============================================================
+ARCHITECTURE 02 — CURRENT
+============================================================
+
+CSV
+ |
+ v
+PostgreSQL
+ |
+ | JDBC
+ v
+Apache Spark
+ |
+ +--> DataFrame Processing
+ |
+ +--> Transformations
+ |
+ +--> Joins
+ |
+ +--> Aggregations
+ |
+ +--> Window Functions
+ |
+ +--> Spark SQL
+ |
+ +--> Optimization
+ |
+ v
+Parquet
+ |
+ +--> Bronze
+ +--> Silver
+ +--> Gold
+
+
+============================================================
+ARCHITECTURE 03 — FUTURE
+============================================================
+
+PostgreSQL Source
+       |
+      JDBC
+       |
+       v
+     Spark
+       |
+   Transform
+       |
+       v
+PostgreSQL Data Warehouse
+       |
+       +--> Fact Tables
+       |
+       +--> Dimension Tables
+       |
+       v
+      BI
+
+
+============================================================
+ARCHITECTURE 04 — FUTURE STREAMING
+============================================================
+
+Kafka
+  |
+  v
+Spark Structured Streaming
+  |
+  v
+Bronze
+  |
+  v
+Silver
+  |
+  v
+Gold
+  |
+  v
+PostgreSQL DW / BI
