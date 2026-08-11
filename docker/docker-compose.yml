@@ -27,16 +27,21 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@transaction.com
       PGADMIN_DEFAULT_PASSWORD: admin_pass
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+      PGADMIN_REPLACE_SERVERS_ON_STARTUP: "True"
 
     ports:
       - "5050:80"
 
     volumes:
-      # pgAdmin configuration and saved server connections
+      # pgAdmin configuration and saved settings
       - pgadmin_data:/var/lib/pgadmin
 
-      # Project SQL files available directly to pgAdmin
-      - ../sql:/var/lib/pgadmin/storage/admin_transaction.com/sql
+      # Project SQL files
+      - ../sql:/project_sql:ro
+
+      # Automatically configure PostgreSQL server in pgAdmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
 
 
   spark:

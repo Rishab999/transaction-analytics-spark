@@ -1,0 +1,13 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "transaction_analytics",
+            "Group": "Servers",
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "transaction_analytics",
+            "Username": "spark_user",
+            "SSLMode": "prefer"
+        }
+    }
+}
