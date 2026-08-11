@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS source.customers(
+CREATE TABLE IF NOT EXISTS source.customers (
     customer_id INT PRIMARY KEY,
     customer_name VARCHAR(100),
     city VARCHAR(50),
@@ -7,15 +7,13 @@ CREATE TABLE IF NOT EXISTS source.customers(
     created_at TIMESTAMP
 );
 
-
-CREATE TABLE IF NOT EXISTS source.accounts(
+CREATE TABLE IF NOT EXISTS source.accounts (
     account_id INT PRIMARY KEY,
     customer_id INT NOT NULL,
     account_type VARCHAR(30),
     branch_id INT,
     opening_date DATE,
     balance DECIMAL(15,2),
-
     CONSTRAINT fk_accounts_customer
         FOREIGN KEY (customer_id)
         REFERENCES source.customers(customer_id)
@@ -29,10 +27,7 @@ CREATE TABLE IF NOT EXISTS source.transactions (
     amount DECIMAL(15,2),
     channel VARCHAR(30),
     status VARCHAR(20),
-
     CONSTRAINT fk_transactions_account
-    FOREIGN KEY (account_id)
-    REFERENCES source.accounts(account_id)
+        FOREIGN KEY (account_id)
+        REFERENCES source.accounts(account_id)
 );
-
-
