@@ -96,7 +96,7 @@ transactions_df.printSchema()
 ## 0 , 2 , 1, 3 is returned after counting NULL.
 
 
-def null_profil(df,name):
+def null_profile(df,name):
     print(f"\n========== NULL PROFILE {name}=========")
     null_counts = df.select([
         count
@@ -114,3 +114,90 @@ def null_profil(df,name):
     null_profile(accounts_df,"ACCOUNTS")
     null_profile(loans_df,"LOANS")
     null_profile(transactions_df,"TRANSACTIONS")
+
+
+###################################################
+#### DUPLICATE profiling
+###################################################
+
+print("\n========== DUPLICATE CHECK ==========")
+
+print(
+    "Duplicate Branch ID's: ",
+    branches_df.count() - branches_df.select("branch_id").distinct().count()  
+)
+
+print(
+    "Duplicate customer ID's:",
+    customers_df.count() - customers_df.select("customer_id").distinct().count()
+)
+
+print(
+    "Duplicate Account ID's:" ,
+    accounts_df.count() - accounts_df.select("account_id").distinct().count()
+)
+
+print(
+    "Duplicate Loan ID's:",
+    loans_df.count() - loans_df.select("loan_id").distinct().count()
+)
+
+print(
+    "Duplicate transaction ID's:",
+    transactions_df.count() - transactions_df.select("transaction_id").distinct().count()
+)
+##################################
+## Profile categorical columns
+##################################
+
+print("\n========== BRANCH STATES ==========")
+### GROUP WISE FETCH THE COUNT OF BRANCHES AND SHOW THEM IN ALPHABATICAL ORDER OF STATE
+branches_df.groupBy("state").count().orderBy("state").show()
+
+print("\n========== BRANCH CITIES ==========")
+
+branches_df.groupBy("cities").count().orderBy("cities").show()
+
+print("\n========== CUSTOMER GENDER ==========")
+customers_df.groupBy("gender").count().show()
+
+print("\n========== CUSTOMER AGE ==========")
+customers_df.groupBy("age").summary().show()
+
+print("\n========== ACCOUNT TYPES ==========")
+accounts_df.groupBy("account_type").count().show()
+
+print("\n========== ACCOUNT STATUS ==========")
+accounts_df.groupBy("status").count().show()
+
+print("\n========== ACCOUNT BALANCE PROFILE ==========")
+accounts_df.select("opening_balance").summary().show()
+
+print("\n========== LOAN TYPES ==========")
+loans_df.groupBy("loan_type").count().show()
+
+print("\n========== LOAN STATUS ==========")
+loans_df.groupBy("status").count().show()
+
+print("\n========== LOAN NUMERIC PROFILE ==========")
+loans_df.select(
+    "principal_amount",
+    "interest_rate",
+    "tenure_months"
+).summary().show()
+
+print("\n========== TRANSACTION TYPES ==========")
+transactions_df.groupBy("transaction_type").count().show()
+
+print("\n========== TRANSACTION CHANNELS ==========")
+transactions_df.groupBy("channels").count().show()
+
+print("\n========== TRANSACTION STATUS ==========")
+transactions_df.groupBy("status").count().show()
+
+print("\n========== TRANSACTION AMOUNT PROFILE ==========")
+transactions_df.select("amount").summary().show()
+
+print("\n========== TRANSACTION DATE PROFILE ==========")
+transactions_df.groupBy("transaction_date").count().show()
+
