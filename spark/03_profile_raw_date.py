@@ -82,8 +82,8 @@ transactions_df.printSchema()
 ## 1. df.select gives columns 
 ## 2. for c in df.columns means we are asking c to iterate for every columns that will be returned
 ## 3. count(....)for c in df.columns does the counting using c
-## 4. col(c) => inside count we cast c as spark  column object using col(c) -> we ask it to get the column , convert into spark column 
-## 4. INSIDE WHEN() -> we check for null values and return it as 'c' using ',c'
+## 4. col(c) => inside count we cast c as spark  column object using col(c) -> we ask it to get inside the column dataframe, and oterate over its rows 
+## 4. INSIDE WHEN() -> If the value is NULL or NaN, return the value as alias.(c) = column name itself, else return 1 if value exists somethung but not NULL. later alias.(c) will be counted for all c in df.columns
 ## 5. alias(c) -> ask it to return value same as ailas c. If we odnt do this then it will give a count(case when .....) result  
 
 ##OUTPUT :
@@ -93,7 +93,8 @@ transactions_df.printSchema()
 # |0        |2          |1    |3   |
 # +---------+-----------+-----+----+
 ## .alias(c) -> returns branch_id , branch_name , state , city columns
-## 0 , 2 , 1, 3 is returned using ' ,c ' inside when
+## 0 , 2 , 1, 3 is returned after counting NULL.
+
 
 def null_profil(df,name):
     print(f"\n========== NULL PROFILE {name}=========")
@@ -101,7 +102,7 @@ def null_profil(df,name):
         count
             (when
                 (
-                    col(c).isNUll() | isnan(col(s)),c
+                    col(c).isNUll() | isnan(col(c)),1
                 ).alias(c)
             ) for c in df.columns
     ])
