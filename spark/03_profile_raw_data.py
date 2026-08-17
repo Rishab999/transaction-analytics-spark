@@ -3,7 +3,7 @@ from pyspark.sql.functions import(
     col,count,when,isnan,countDistinct)
 
 from pathlib import Path
-project_path = Path(__file__).resolve.parents[1]
+project_path = Path(__file__).resolve().parents[1]
 raw_path = project_path/"data"/"raw"
 
 spark = (
@@ -11,6 +11,8 @@ spark = (
     .appName("transactionAnalytics-Profiling")
     .getOrCreate()
 )
+
+spark.sparkContext.setLogLevel("WARN")
 #################################
 ## LOAD ALL DATASETS
 #################################
@@ -201,3 +203,58 @@ transactions_df.select("amount").summary().show()
 print("\n========== TRANSACTION DATE PROFILE ==========")
 transactions_df.groupBy("transaction_date").count().show()
 
+print("\n========== TRANSACTION WITH INVALID ACCOUNT ID'S ==========")
+
+inv_trans_accounts = (
+    transactions_df
+    .join(
+        accounts_df.select("account_id"),
+        on = "account_id",
+        how = "left_anti"
+    )
+)
+print("Transactions with Invald Account ID:", 
+      inv_trans_accounts.count()
+    )
+
+#   Give me records from the left DataFrame that do not have a matching record in the right DataFrame. 
+##  here left_df is to check and right_df(inside join ) is the master
+  
+print("\n========== ACCOUNT WISE INVALID CUSTOMER ID's  ==========")
+inv_cust_acc = (
+    accounts_df
+    .join
+    (
+        customers_df.select("customer_id"),
+        on="customer_id",
+        how= "left_anti"
+    )
+)
+
+print("Accounts with Invalid Customer ID's:", inv_cust_acc)
+
+print("\n========== ACCOUNT WISE INVALID BRANCH ID's  ==========")
+
+inv_acc_br = (
+    accounts_df
+    .join(
+        branches_df.select("branch_id"),
+        on="branch_id",
+        how="left_anti"
+    )
+)
+
+print("Accounts with Invalid Branch ID's:", inv_acc_br)
+
+print("\n========== CUSTOMER WISE INVALID BRANCH ID's  ==========")
+
+inv_cust_br = (
+    customers_df
+    .join(
+        branches_df.select("branc_id"),
+        on="branch_id",
+        how="left_anti"
+    )
+)
+
+print("Customers with Invalid Branch ID's:", inv_cust_br)
