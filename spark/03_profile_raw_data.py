@@ -48,7 +48,7 @@ transactions_df = (
     spark.read
     .option("header",True)
     .option("inferSchema",True)
-    .csv(raw_path/"transactions.csv")
+    .csv(str(raw_path/"transactions.csv"))
 )
 ###################################################
 #### First profiling check: row counts
@@ -158,13 +158,13 @@ branches_df.groupBy("state").count().orderBy("state").show()
 
 print("\n========== BRANCH CITIES ==========")
 
-branches_df.groupBy("cities").count().orderBy("cities").show()
+branches_df.groupBy("city").count().orderBy("city").show()
 
 print("\n========== CUSTOMER GENDER ==========")
 customers_df.groupBy("gender").count().show()
 
 print("\n========== CUSTOMER AGE ==========")
-customers_df.groupBy("age").summary().show()
+customers_df.groupBy("age").count().show()
 
 print("\n========== ACCOUNT TYPES ==========")
 accounts_df.groupBy("account_type").count().show()
@@ -192,7 +192,7 @@ print("\n========== TRANSACTION TYPES ==========")
 transactions_df.groupBy("transaction_type").count().show()
 
 print("\n========== TRANSACTION CHANNELS ==========")
-transactions_df.groupBy("channels").count().show()
+transactions_df.groupBy("channel").count().show()
 
 print("\n========== TRANSACTION STATUS ==========")
 transactions_df.groupBy("status").count().show()
@@ -251,7 +251,7 @@ print("\n========== CUSTOMER WISE INVALID BRANCH ID's  ==========")
 inv_cust_br = (
     customers_df
     .join(
-        branches_df.select("branc_id"),
+        branches_df.select("branch_id"),
         on="branch_id",
         how="left_anti"
     )
