@@ -164,7 +164,7 @@ print("\n========== CUSTOMER GENDER ==========")
 customers_df.groupBy("gender").count().show()
 
 print("\n========== CUSTOMER AGE ==========")
-customers_df.groupBy("age").count().show()
+customers_df.groupBy("age").count().orderBy("age").show()
 
 print("\n========== ACCOUNT TYPES ==========")
 accounts_df.groupBy("account_type").count().show()
@@ -201,7 +201,11 @@ print("\n========== TRANSACTION AMOUNT PROFILE ==========")
 transactions_df.select("amount").summary().show()
 
 print("\n========== TRANSACTION DATE PROFILE ==========")
-transactions_df.groupBy("transaction_date").count().show()
+transactions_df.select(
+    min("transaction_date").alias("min_date"),
+    max("transaction_date").alias("max_date")
+).show()
+
 
 print("\n========== TRANSACTION WITH INVALID ACCOUNT ID'S ==========")
 
@@ -231,7 +235,8 @@ inv_cust_acc = (
     )
 )
 
-print("Accounts with Invalid Customer ID's:", inv_cust_acc)
+print("Accounts with Invalid Customer ID's:", inv_cust_acc.show())
+inv_cust_acc.show(20,truncate = False)
 
 print("\n========== ACCOUNT WISE INVALID BRANCH ID's  ==========")
 
@@ -244,7 +249,8 @@ inv_acc_br = (
     )
 )
 
-print("Accounts with Invalid Branch ID's:", inv_acc_br)
+print("Accounts with Invalid Branch ID's:", inv_acc_br.show())
+inv_acc_br.show(20 , truncate = False)
 
 print("\n========== CUSTOMER WISE INVALID BRANCH ID's  ==========")
 
@@ -257,4 +263,75 @@ inv_cust_br = (
     )
 )
 
-print("Customers with Invalid Branch ID's:", inv_cust_br)
+print("Customers with Invalid Branch ID's:", inv_cust_br.count())
+inv_cust_br.show(20, truncate = False)
+
+# ============================================================
+# NULL VALUE PROFILING
+# ============================================================
+
+print("\n===== NULL VALUE PROFILE =====")
+
+def null_profile(df , df_name):
+    print(f"\n--- {df_name} ---")
+    #1 df.columns -> ["branch_id", "branch_name", "state", "city"]
+    
+    #2 for c in df.columns 
+    #   c = "branch_id"
+    #   c = "branch_name"
+    #   c = "state"
+    #   c = "city" 
+
+    # 3 col(c) -> c = "state" = col(c)
+    #   -> Represent the state column as a Spark Column expression. 
+    
+    # 4 col(c).isNull() -> Is the value in state NULL?
+        #-> state       isNull()
+
+        #   Maharashtra False
+        #   NULL        True
+        #   Delhi       False
+        #   NULL        True
+        #   Gujarat     False
+
+    #5 col(c).isNull().cast("int") -> True  → 1 False → 0
+    # THEREFORE COUNT OF 1 = ALL NULL VALUES
+
+    null_counts = df.select(
+        *[
+            sum(col(c).isnull.cast("int").alias(c)) for c in df.columns
+        ]
+    )
+    null_counts.show()
+null_profile(branches_df, "BRANCHES")
+null_profile(customers_df, "CUSTOMERS")
+null_profile(accounts_df, "ACCOUNTS")
+null_profile(loans_df, "LOANS")
+null_profile(transactions_df, "TRANSACTIONS")
+
+# ============================================================
+# CUSTOMER AGE VALIDATION
+# ============================================================
+
+print("\n========== INVALID CUSTOMER AGES ==========")
+
+inv_age = (
+    customers_df.filter(
+        (col("age")<18) |
+        (col("age")>100)
+    )
+)
+print("Invalid Customer Ages:", inv_age.count())
+inv_age.show()
+
+# ============================================================
+# ACCOUNT BALANCE VALIDATION
+# ============================================================
+
+print("\n========== INVALID ACCOUNT BALANCES ==========")
+
+inv_acc_bal = (
+    accounts_df.filter(col("opening_balance") < 0)
+)
+print( "Accounts with negative opening balance:",inv_acc_bal.count())
+inv_acc_bal.show()
