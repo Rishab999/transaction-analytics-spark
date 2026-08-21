@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import(
-    col,count,when,isnan,countDistinct)
+    col,count,when,isnan,countDistinct , min , max , sum)
 
 from pathlib import Path
 project_path = Path(__file__).resolve().parents[1]
@@ -104,18 +104,18 @@ def null_profile(df,name):
         count
             (when
                 (
-                    col(c).isNUll() | isnan(col(c)),1
+                    col(c).isNull() | isnan(col(c)),1
                 ).alias(c)
             ) for c in df.columns
     ])
 
     null_counts.show()
 
-    null_profile(branches_df  ,"BRANCEHS")
-    null_profile(customers_df,"CUSTOMERS")
-    null_profile(accounts_df,"ACCOUNTS")
-    null_profile(loans_df,"LOANS")
-    null_profile(transactions_df,"TRANSACTIONS")
+null_profile(branches_df  ,"BRANCEHS")
+null_profile(customers_df,"CUSTOMERS")
+null_profile(accounts_df,"ACCOUNTS")
+null_profile(loans_df,"LOANS")
+null_profile(transactions_df,"TRANSACTIONS")
 
 
 ###################################################
@@ -443,12 +443,12 @@ inv_city_state = (
         "expected_state" , 
         mapping_expr[col("city")]
     ).filter(
-        col("state") ! = col("expected_sate")
+        col("state") != col("expected_sate")
     )
 )
 
 print("Branches with in valid city-state mapping:". inv_city_state.count())
 
 inv_city_state.select(
-    "branch_id" , "branch_name" , "city" ,  "state" , '"expected_state"
+    "branch_id" , "branch_name" , "city" ,  "state" , "expected_state"
 ).show(20)
