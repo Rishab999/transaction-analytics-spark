@@ -335,3 +335,120 @@ inv_acc_bal = (
 )
 print( "Accounts with negative opening balance:",inv_acc_bal.count())
 inv_acc_bal.show()
+
+# ============================================================
+# LOAN AMOUNT VALIDATION
+# ============================================================
+print("\n========== INVALID LOAN AMOUNTS ==========")
+
+inv_loan_amt = (
+    loans_df.filtert(col("principal_amount") <= 0)
+)
+print("Loans with Invalid principal Amount:", inv_loan_amt.count())
+inv_loan_amt.show()
+
+
+# ============================================================
+# LOAN INTEREST RATE VALIDATION
+# ============================================================
+
+print("\n========== INVALID INTEREST RATES ==========")
+
+inv_int_rate =  (
+    loans_df.filter(
+        (col("interest_rate") <= 0) |
+        (col("interest_rate") > 100)
+    )
+)
+print("Loans with INvalid Interest Rate:", inv_int_rate.count())
+inv_int_rate.show()
+
+# ============================================================
+# LOAN TENURE VALIDATION
+# ============================================================
+
+print("\n========== INVALID LOAN TENURE ==========")
+
+inv_loan_tenure = (
+    loans_df.filter(
+        (COL("tenure_months") <= 0)
+    )
+)
+print("Loans with Invalid tenure:", inv_loan_tenure.count())
+
+inv_loan_tenure.show()
+
+# ============================================================
+# TRANSACTION AMOUNT VALIDATION
+# ============================================================
+print("\n========== INVALID TRANSACTION AMOUNTS ==========")
+
+inv_trans_amt = (
+    transactions_df.filter(
+        col("amount"<= 0)
+    )
+)
+
+print("transactions with Invalid Amount:", inv_trans_amt.count())
+inv_trans_amt.show()
+
+# ============================================================
+# TRANSACTION DATE VALIDATION
+# ============================================================
+
+print("\n========== INVALID TRANSACTION DATES ==========")
+
+inv_trans_date = (
+    transactions_df.filter(
+        col("ransaction_date").isnull()
+    )
+)
+
+print("transactions with Invalid Transaction Date", inv_trans_date.count())
+inv_trans_date.show()
+
+
+# ============================================================
+# CITY-STATE VALIDATION
+# ============================================================
+
+print("\n========== INVALID CITY-STATE MAPPINGS ==========")
+
+valid_city_state = {
+    "Nagpur":"Maharashtra",
+    "Mumbai":"Maharashtra",
+    "Pune": "Maharashtra",
+    "Hyderabad": "Telangana",
+    "Chennai" : "Tamil Nadu",
+    "Bengaluru" : "Karnataka",
+    "Kolkata" : "West Bengal",\
+    "Delhi" : "Delhi"
+}
+
+from pyspark.sql.functions import create_map , lit
+
+mapping_expr = create_map(
+    *[
+        item
+        # converting valid city item distiopnary to key value pairs pair[0] = city , pair[1] = state
+        for pair in valid_city_state.items()
+        # converting above created python dictionaries to spark literals
+        for item in (lit(pair[0]), lit(pair[1]))
+    ]
+)
+
+inv_city_state = (
+    branches_df
+    .withColumn(
+        "expected_state" , 
+        mapping_expr[col("city")]
+    ).filter(
+        col("state") ! = col("expected_sate")
+    )
+)
+
+print("Branches with in valid city-state mapping:". inv_city_state.count())
+
+inv_city_state.select(
+    "branch_id" , "branch_name" , "city" ,  "state" , '"expected_state"
+).show(20)
