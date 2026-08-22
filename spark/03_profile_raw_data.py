@@ -109,9 +109,7 @@ def null_profile(df,df_name):
 
         if data_type.simpleString() in ["double" , "float"]:
             expression = count (
-                (when
-                col(column_name).isNull() | isnan(col(column_name))
-                ),1
+                when(col(column_name).isNull() | isnan(col(column_name)),1)
             ).alias(column_name)
         
         else:
