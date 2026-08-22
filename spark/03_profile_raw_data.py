@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import(
-    col,count,when,isnan,countDistinct , min , max , sum)
+    col,count,when,isnan,countDistinct , min , max , sum , create_map , lit
+    )
 
 from pathlib import Path
 project_path = Path(__file__).resolve().parents[1]
@@ -98,18 +99,28 @@ transactions_df.printSchema()
 ## 0 , 2 , 1, 3 is returned after counting NULL.
 
 
-def null_profile(df,name):
-    print(f"\n========== NULL PROFILE {name}=========")
-    null_counts = df.select([
-        count
-            (when
-                (
-                    col(c).isNull() | isnan(col(c)),1
-                ).alias(c)
-            ) for c in df.columns
-    ])
+def null_profile(df,df_name):
+    print(f"\n========== NULL PROFILE {df_name}=========")
+    expressions = []
+    
+    for fields in df.Schema.fields:
+        column_name = field.name
+        data_type = field.data_type
 
-    null_counts.show()
+        if data_type.simpleString() in ["double" , "float"]:
+            expression = count (
+                (when
+                col(column_name).isNull() | isnan(col(column_name))
+                ),1
+            ).alias(column_name)
+        
+        else:
+            expression = count (
+                col(column_name).isNull(),1
+                ).alias(column_name)
+            expressions.append(expresion)
+    
+    df.select(expressions).show()
 
 null_profile(branches_df  ,"BRANCEHS")
 null_profile(customers_df,"CUSTOMERS")
@@ -266,48 +277,6 @@ inv_cust_br = (
 print("Customers with Invalid Branch ID's:", inv_cust_br.count())
 inv_cust_br.show(20, truncate = False)
 
-# ============================================================
-# NULL VALUE PROFILING
-# ============================================================
-
-print("\n===== NULL VALUE PROFILE =====")
-
-def null_profile(df , df_name):
-    print(f"\n--- {df_name} ---")
-    #1 df.columns -> ["branch_id", "branch_name", "state", "city"]
-    
-    #2 for c in df.columns 
-    #   c = "branch_id"
-    #   c = "branch_name"
-    #   c = "state"
-    #   c = "city" 
-
-    # 3 col(c) -> c = "state" = col(c)
-    #   -> Represent the state column as a Spark Column expression. 
-    
-    # 4 col(c).isNull() -> Is the value in state NULL?
-        #-> state       isNull()
-
-        #   Maharashtra False
-        #   NULL        True
-        #   Delhi       False
-        #   NULL        True
-        #   Gujarat     False
-
-    #5 col(c).isNull().cast("int") -> True  → 1 False → 0
-    # THEREFORE COUNT OF 1 = ALL NULL VALUES
-
-    null_counts = df.select(
-        *[
-            sum(col(c).isnull.cast("int").alias(c)) for c in df.columns
-        ]
-    )
-    null_counts.show()
-null_profile(branches_df, "BRANCHES")
-null_profile(customers_df, "CUSTOMERS")
-null_profile(accounts_df, "ACCOUNTS")
-null_profile(loans_df, "LOANS")
-null_profile(transactions_df, "TRANSACTIONS")
 
 # ============================================================
 # CUSTOMER AGE VALIDATION
@@ -452,3 +421,6 @@ print("Branches with in valid city-state mapping:". inv_city_state.count())
 inv_city_state.select(
     "branch_id" , "branch_name" , "city" ,  "state" , "expected_state"
 ).show(20)
+
+
+spark.stop()
